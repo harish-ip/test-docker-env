@@ -1,0 +1,29 @@
+version: '3'
+services:
+  postgres_server_tomcat:
+    container_name: app-postgres-db
+    image: postgres:12
+    ports:
+     - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=insight
+    volumes:
+      - ./backup:/var/lib/postgresql/data 
+  tomcat_app:
+    container_name: app-springboot-tomcat
+    image: app-springboot-tomcat
+    build: 
+      dockerfile: Dockerfile
+      context: ./
+    ports:
+      - "80:8080"
+    depends_on:
+      - postgres_server_tomcat
+    environment:
+        - 'spring.datasource.url=jdbc:postgresql://postgres_server_tomcat:5432/insight'
+        - 'spring.datasource.username=postgres'
+        - 'spring.datasource.password=postgres'
+        - 'spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect'
+        - 'spring.jpa.hibernate.ddl-auto=update'
